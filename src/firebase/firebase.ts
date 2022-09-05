@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { userStore } from "../stores/user.store";
 import { firebaseConfig } from "./config";
+import { getDatabase } from "firebase/database";
 
 
 // Initialize Firebase
@@ -12,12 +13,13 @@ const analytics = getAnalytics(app);
 const Auth = getAuth(app);
 Auth.useDeviceLanguage();
 
+const database = getDatabase(app);
 
 onAuthStateChanged(Auth, (user) => {
-    console.log(user);
     userStore.set(user);
 });
 
 export {
-    Auth
+    Auth,
+    database
 }
