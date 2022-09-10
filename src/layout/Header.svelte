@@ -59,9 +59,14 @@
 
 <Sidepanel left bind:visible={sidepanelVisible}>
     <div class="logo" style="padding-left: 1rem;">Help</div>
-    <p>
-        <i style="padding: 12px;">Blank</i>
-    </p>
+    <ul>
+        <li>
+            <a href="#/">Miam liste</a>
+        </li>
+        <li>
+            <a href="#/miam-form">Miam form</a>
+        </li>
+    </ul>
 </Sidepanel>
 
 <style>
