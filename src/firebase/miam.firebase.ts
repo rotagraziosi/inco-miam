@@ -19,3 +19,11 @@ export const writeMiam = (label: string, description: string, needBooking: boole
 
     return update(ref(database), updates);
 }
+
+
+export const deleteMiam = (key: string): Promise<void> => {
+    const dbRef = ref(database);
+    const updates = {};
+    updates[`miams/${key}`] = null;
+    return update(dbRef, updates);
+};
