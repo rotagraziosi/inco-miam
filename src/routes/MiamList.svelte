@@ -5,12 +5,15 @@
     import { Button, Icon, Snackbar } from "svelte-mui";
     import DeleteIcon from "../lib/DeleteIcon.svelte";
     import { deleteMiam } from "../firebase/miam.firebase";
+    import ConfirmModal from "../lib/modals/ConfirmModal.svelte";
 
     const starCountRef = ref(database, "miams");
 
     let miams = [];
     let miamListUnsubscribe: Unsubscribe;
     let confirmMessageVisible = false;
+    let displayConfirmDeleteDialog = false;
+    let keyToDelete = undefined;
 
     onMount(async (): Promise<void> => {
         miamListUnsubscribe = onValue(starCountRef, (snapshot) => {
@@ -25,13 +28,33 @@
     });
 
     const onDeleteMiam = (key: string): void => {
-        deleteMiam(key).then(() => {
-            confirmMessageVisible = true;
+        displayConfirmDeleteDialog = true;
+        keyToDelete = key;
+    };
 
-            setTimeout(() => {
-                confirmMessageVisible = false;
-            }, 5000);
-        });
+    const onConfirmDelete = (
+        event: CustomEvent<{ confirm: boolean }>
+    ): void => {
+        if (!keyToDelete) {
+            throw new Error("Key of the item to delete not defined");
+        }
+
+        if (event.detail.confirm) {
+            deleteMiam(keyToDelete)
+                .then(() => {
+                    confirmMessageVisible = true;
+
+                    setTimeout(() => {
+                        confirmMessageVisible = false;
+                    }, 5000);
+                })
+                .finally(() => {
+                    displayConfirmDeleteDialog = false;
+                });
+        } else {
+            displayConfirmDeleteDialog = false;
+        }
+        keyToDelete = undefined;
     };
 </script>
 
@@ -40,14 +63,16 @@
 <ul>
     {#each Object.entries(miams) as [key, miam]}
         <li>
-            <span>
+            <div class="item-label">
                 {miam.label}
-            </span>
-            <Button icon color="primary" on:click={onDeleteMiam(key)}>
-                <Icon>
-                    <DeleteIcon />
-                </Icon>
-            </Button>
+            </div>
+            <div class="item-actions">
+                <Button icon color="primary" on:click={onDeleteMiam(key)}>
+                    <Icon>
+                        <DeleteIcon />
+                    </Icon>
+                </Button>
+            </div>
         </li>
     {/each}
 </ul>
@@ -61,8 +86,31 @@
     </span>
 </Snackbar>
 
+<ConfirmModal
+    visible={displayConfirmDeleteDialog}
+    title={"hello world"}
+    message={"message bonjour monde"}
+    on:confirm={onConfirmDelete}
+/>
+
 <style>
     ul {
         list-style: none;
+    }
+
+    li {
+        height: 40px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+
+    li div.item-actions {
+        display: none;
+    }
+
+    li:hover div.item-actions {
+        display: initial;
     }
 </style>
