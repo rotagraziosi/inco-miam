@@ -12,10 +12,12 @@
 
     const onConfirm = (): void => {
         dispatch("confirm", { confirm: true });
+        visible = false;
     };
 
     const onDiscard = (): void => {
         dispatch("confirm", { confirm: false });
+        visible = false;
     };
 </script>
 

@@ -6,14 +6,13 @@
     import DeleteIcon from "../lib/DeleteIcon.svelte";
     import { deleteMiam } from "../firebase/miam.firebase";
     import ConfirmModal from "../lib/modals/ConfirmModal.svelte";
+    import { push } from "svelte-spa-router";
 
     const starCountRef = ref(database, "miams");
 
     let miams = [];
     let miamListUnsubscribe: Unsubscribe;
     let confirmMessageVisible = false;
-    let displayConfirmDeleteDialog = false;
-    let keyToDelete = undefined;
 
     onMount(async (): Promise<void> => {
         miamListUnsubscribe = onValue(starCountRef, (snapshot) => {
@@ -28,37 +27,35 @@
     });
 
     const onDeleteMiam = (key: string): void => {
-        displayConfirmDeleteDialog = true;
-        keyToDelete = key;
-    };
-
-    const onConfirmDelete = (
-        event: CustomEvent<{ confirm: boolean }>
-    ): void => {
-        if (!keyToDelete) {
-            throw new Error("Key of the item to delete not defined");
-        }
-
-        if (event.detail.confirm) {
-            deleteMiam(keyToDelete)
-                .then(() => {
+        const confirmModal = new ConfirmModal({
+            target: document.body,
+            props: {
+                message: `Voulez vous supprimer ce miam ?`,
+                title: "Supprimer un miam",
+                visible: true,
+            },
+        });
+        confirmModal.$on("confirm", (e: CustomEvent<{ confirm: boolean }>) => {
+            if (confirm) {
+                deleteMiam(key).then(() => {
                     confirmMessageVisible = true;
 
                     setTimeout(() => {
                         confirmMessageVisible = false;
                     }, 5000);
-                })
-                .finally(() => {
-                    displayConfirmDeleteDialog = false;
                 });
-        } else {
-            displayConfirmDeleteDialog = false;
-        }
-        keyToDelete = undefined;
+            }
+        });
+    };
+
+    const goToMiamForm = (): void => {
+        push("/miam-form");
     };
 </script>
 
 <h1>Gérer la liste des miams</h1>
+
+<Button on:click={goToMiamForm}>Ajouter un miam</Button>
 
 <ul>
     {#each Object.entries(miams) as [key, miam]}
@@ -86,13 +83,13 @@
     </span>
 </Snackbar>
 
+<!-- 
 <ConfirmModal
     visible={displayConfirmDeleteDialog}
     title={"hello world"}
     message={"message bonjour monde"}
     on:confirm={onConfirmDelete}
-/>
-
+/> -->
 <style>
     ul {
         list-style: none;
