@@ -1,25 +1,29 @@
 <script lang="ts">
-    import { Textfield, Checkbox, Button, Snackbar } from "svelte-mui";
+    import { SnackbarType } from "../interfaces/snackbar-informations.interface";
+    import { Textfield, Checkbox, Button } from "svelte-mui";
+    import { push } from "svelte-spa-router";
     import { writeMiam } from "../firebase/miam.firebase";
+    import { snackbarStore } from "../stores/snackbar.store";
+
     let labelField: string = "";
     let description: string = "";
     let needBooking: boolean = false;
-    let snackbarVisisble: boolean = false;
 
     const onValidate = (): void => {
-        console.log(labelField, description, needBooking);
         writeMiam(labelField, description, needBooking).then(() => {
-            console.log("success write");
-
             labelField = "";
             description = "";
             needBooking = false;
-            snackbarVisisble = true;
 
-            setTimeout(() => {
-                snackbarVisisble = false;
-            }, 5000);
+            snackbarStore.set({
+                message: "Miam créé avec succès",
+                type: SnackbarType.success,
+            });
         });
+    };
+
+    const goToMiamList = (): void => {
+        push("/");
     };
 </script>
 
@@ -34,13 +38,5 @@
         <span>Besoin de reserver ?</span>
     </Checkbox>
     <Button on:click={onValidate}>Valider</Button>
+    <Button on:click={goToMiamList}>Aller à la liste des Miams</Button>
 </div>
-
-<Snackbar bind:visible={snackbarVisisble} bg="#f44336">
-    Miam ajouté avec succes !
-    <span slot="action">
-        <Button color="#ff0" on:click={() => (snackbarVisisble = false)}
-            >Fermer</Button
-        >
-    </span>
-</Snackbar>

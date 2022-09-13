@@ -7,12 +7,13 @@
     import { deleteMiam } from "../firebase/miam.firebase";
     import ConfirmModal from "../lib/modals/ConfirmModal.svelte";
     import { push } from "svelte-spa-router";
+    import { snackbarStore } from "../stores/snackbar.store";
+    import { SnackbarType } from "../interfaces/snackbar-informations.interface";
 
     const starCountRef = ref(database, "miams");
 
     let miams = [];
     let miamListUnsubscribe: Unsubscribe;
-    let confirmMessageVisible = false;
 
     onMount(async (): Promise<void> => {
         miamListUnsubscribe = onValue(starCountRef, (snapshot) => {
@@ -38,11 +39,10 @@
         confirmModal.$on("confirm", (e: CustomEvent<{ confirm: boolean }>) => {
             if (confirm) {
                 deleteMiam(key).then(() => {
-                    confirmMessageVisible = true;
-
-                    setTimeout(() => {
-                        confirmMessageVisible = false;
-                    }, 5000);
+                    snackbarStore.set({
+                        message: "Miam supprimé avec succès",
+                        type: SnackbarType.success,
+                    });
                 });
             }
         });
@@ -74,22 +74,6 @@
     {/each}
 </ul>
 
-<Snackbar bind:visible={confirmMessageVisible} bg="#f44336">
-    Miam supprimé
-    <span slot="action">
-        <Button color="#ff0" on:click={() => (confirmMessageVisible = false)}
-            >Fermer</Button
-        >
-    </span>
-</Snackbar>
-
-<!-- 
-<ConfirmModal
-    visible={displayConfirmDeleteDialog}
-    title={"hello world"}
-    message={"message bonjour monde"}
-    on:confirm={onConfirmDelete}
-/> -->
 <style>
     ul {
         list-style: none;

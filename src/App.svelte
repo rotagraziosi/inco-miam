@@ -1,6 +1,18 @@
 <script lang="ts">
   import Login from "./components/Login.svelte";
+  import type {
+    SnackbarComponentInformations,
+    SnackbarInformations,
+  } from "./interfaces/snackbar-informations.interface";
   import Header from "./layout/Header.svelte";
+  import Snackbar from "./lib/snackbar/Snackbar.svelte";
+  import { snackbarStore } from "./stores/snackbar.store";
+
+  let snackbarInfo: SnackbarComponentInformations;
+
+  const snackbarUnsubscribe = snackbarStore.subscribe((info) => {
+    snackbarInfo = { ...info, visible: true };
+  });
 </script>
 
 <main>
@@ -9,6 +21,7 @@
     <Login />
   </article>
   <footer>footer</footer>
+  <Snackbar {...snackbarInfo} />
 </main>
 
 <style>
@@ -24,12 +37,11 @@
   }
 
   article {
-    /* background-color: purple; */
     flex: 1;
     overflow: auto;
   }
 
   footer {
-    /* background-color: blue; */
+    display: none;
   }
 </style>
